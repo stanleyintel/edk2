@@ -393,6 +393,7 @@ IsTerminalDevicePath (
   OUT UINTN                     *Com
   );
 
+
 /**
   Build a list containing all serial devices.
 
@@ -449,6 +450,7 @@ LocateSerialIo (
   SortedUartHandle (Handles, NoHandles);
 
   for (Index = 0; Index < NoHandles; Index++) {
+    // DEBUG ((DEBUG_ERROR, "@@@@@@  LocateSerialIo Index=%d\n", Index));
     //
     // Check to see whether the handle has DevicePath Protocol installed
     //
@@ -470,7 +472,15 @@ LocateSerialIo (
       Acpi = (ACPI_HID_DEVICE_PATH *)Node;
     }
 
-    if ((Acpi != NULL) && IsIsaSerialNode (Acpi)) {
+    /*
+    if (Acpi) {
+      DEBUG ((DEBUG_ERROR, "@@@ is MSG_UART_DP: %d\n", DevicePathSubType (Node) == MSG_UART_DP));
+      DEBUG ((DEBUG_ERROR, "@@@@@@  LocateSerialIo HID = %4x UID = %4x\n", Acpi->HID, Acpi->UID));
+    }
+    */
+
+    //if ((Acpi != NULL) && IsIsaSerialNode (Acpi)) {
+    if ((Acpi != NULL)) {
       NewMenuEntry = BOpt_CreateMenuEntry (BM_TERMINAL_CONTEXT_SELECT);
       if (NewMenuEntry == NULL) {
         FreePool (Handles);
@@ -478,7 +488,9 @@ LocateSerialIo (
       }
 
       NewTerminalContext = (BM_TERMINAL_CONTEXT *)NewMenuEntry->VariableContext;
-      CopyMem (&NewMenuEntry->OptionNumber, &Acpi->UID, sizeof (UINT32));
+      if (IsIsaSerialNode(Acpi)) {
+        CopyMem (&NewMenuEntry->OptionNumber, &Acpi->UID, sizeof (UINT32));
+      }
       NewTerminalContext->DevicePath = DuplicateDevicePath (DevicePath);
       //
       // BugBug: I have no choice, calling EfiLibStrFromDatahub will hang the system!
